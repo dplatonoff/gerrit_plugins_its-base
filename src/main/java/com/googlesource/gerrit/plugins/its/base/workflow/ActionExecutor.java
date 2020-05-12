@@ -62,7 +62,7 @@ public class ActionExecutor {
         action = addCommentFactory.create();
       } else if ("add-standard-comment".equals(name)) {
         action = addStandardCommentFactory.create();
-      } else if ("add-velocity-comment".equals(name)) {
+      } else if ("add-velocity-comment".equals(name) || "add-velocity-link".equals(name)) {
         action = addVelocityCommentFactory.create();
       } else if ("add-soy-comment".equals(name)) {
         action = addSoyCommentFactory.create();

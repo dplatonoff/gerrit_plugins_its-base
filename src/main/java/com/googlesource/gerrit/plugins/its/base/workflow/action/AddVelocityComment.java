@@ -17,21 +17,25 @@ package com.googlesource.gerrit.plugins.its.base.workflow.action;
 import com.google.common.base.Strings;
 import com.google.gerrit.server.config.SitePath;
 import com.google.inject.Inject;
+
 import com.googlesource.gerrit.plugins.its.base.its.ItsFacade;
 import com.googlesource.gerrit.plugins.its.base.workflow.ActionRequest;
 import com.googlesource.gerrit.plugins.its.base.workflow.Property;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Adds a short predefined comments to an issue.
@@ -109,6 +113,24 @@ public class AddVelocityComment implements Action {
     }
     if (!Strings.isNullOrEmpty(template)) {
       String comment = velocify(template, properties);
+
+      // attempt a link
+      if ("add-velocity-link".equals(actionRequest.getName())
+          && properties.stream().anyMatch(property -> {
+            if ("changeUrl".equals(property.getKey())) {
+              try {
+                its.addIssueLink(issue, new URL(property.getValue()), comment);
+                return true;
+              } catch (IOException e) {
+                log.error("Invalid change URL {}", e.getMessage());
+              }
+            }
+            return false;
+          })) {
+        return;
+      }
+
+      // fall back to posting a comment
       its.addComment(issue, comment);
     }
   }

@@ -33,9 +33,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -70,6 +72,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Simple-text"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     IAnswer<Boolean> answer = new VelocityWriterFiller("Simple-text");
     expect(
@@ -88,10 +91,35 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     addVelocityComment.execute("4711", actionRequest, new HashSet<>());
   }
 
+  public void testInlinePlainLink() throws IOException {
+    ActionRequest actionRequest = createMock(ActionRequest.class);
+    expect(actionRequest.getParameter(1)).andReturn("inline");
+    expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Simple-text"});
+    expect(actionRequest.getName()).andReturn("add-velocity-link");
+
+    IAnswer<Boolean> answer = new VelocityWriterFiller("Simple-text");
+    expect(
+            velocityRuntime.evaluate(
+                (VelocityContext) anyObject(),
+                (Writer) anyObject(),
+                (String) anyObject(),
+                eq("Simple-text")))
+        .andAnswer(answer);
+
+    its.addIssueLink("4711", new URL("https://google.com"), "Simple-text");
+
+    replayMocks();
+
+    AddVelocityComment addVelocityComment = createAddVelocityComment();
+    addVelocityComment.execute("4711", actionRequest,
+        new HashSet<>(Arrays.asList(new Property("changeUrl", "https://google.com"))));
+  }
+
   public void testInlineWithMultipleParameters() throws IOException {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Param2", "Param3"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     Set<Property> properties = Sets.newHashSet();
 
@@ -116,6 +144,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "${subject}"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     Set<Property> properties = Sets.newHashSet();
 
@@ -149,6 +178,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Test"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     Set<Property> properties = Sets.newHashSet();
 
@@ -179,6 +209,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters())
         .andReturn(new String[] {"inline", "${subject}", "${reason}", "${subject}"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     Set<Property> properties = Sets.newHashSet();
 
@@ -219,6 +250,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Simple-Text"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     IAnswer<Boolean> answer = new VelocityWriterFiller("Simple-Text");
     Capture<VelocityContext> contextCapture = createCapture();
@@ -256,6 +288,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("inline");
     expect(actionRequest.getParameters()).andReturn(new String[] {"inline", "Simple-Text"});
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     IAnswer<Boolean> answer = new VelocityWriterFiller("Simple-Text");
     Capture<VelocityContext> contextCapture = createCapture();
@@ -303,6 +336,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
   public void testTemplateSimple() throws IOException {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("test-template");
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     injectTestTemplate("Simple Test Template");
 
@@ -326,6 +360,7 @@ public class AddVelocityCommentTest extends LoggingMockingTestCase {
   public void testTemplateMultipleParametersAndProperties() throws IOException {
     ActionRequest actionRequest = createMock(ActionRequest.class);
     expect(actionRequest.getParameter(1)).andReturn("test-template");
+    expect(actionRequest.getName()).andReturn("add-velocity-comment");
 
     Set<Property> properties = Sets.newHashSet();
 

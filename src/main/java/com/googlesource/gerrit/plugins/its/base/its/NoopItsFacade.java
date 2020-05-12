@@ -40,6 +40,13 @@ public class NoopItsFacade implements ItsFacade {
   }
 
   @Override
+  public void addIssueLink(String issueId, URL url, String description) throws IOException {
+    if (log.isDebugEnabled()) {
+      log.debug("addIssueLink({},{},{})", issueId, url, description);
+    }
+  }
+
+  @Override
   public boolean exists(String issueId) throws IOException {
     if (log.isDebugEnabled()) {
       log.debug("exists({})", issueId);

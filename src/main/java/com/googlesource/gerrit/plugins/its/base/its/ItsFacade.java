@@ -29,6 +29,21 @@ public interface ItsFacade {
 
   public void addRelatedLink(String issueId, URL relatedUrl, String description) throws IOException;
 
+  /**
+   * Attaches a code review link to the issue, as a means to avoid polluting the comment space.
+   * <p>
+   * Usage:
+   * <pre>
+   * action = add-velocity-link inline Gerrit:${status} > ${project}[$branch] > ${subject}
+   * </pre>
+   *
+   * @param issueId issue ID
+   * @param url code review URL
+   * @param description link description
+   * @throws IOException
+   */
+  public void addIssueLink(String issueId, URL url, String description) throws IOException;
+
   public void addComment(String issueId, String comment) throws IOException;
 
   public void performAction(String issueId, String actionName) throws IOException;
